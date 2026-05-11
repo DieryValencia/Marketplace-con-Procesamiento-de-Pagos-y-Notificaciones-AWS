@@ -1,39 +1,58 @@
-# Marketplace con Procesamiento de Pagos y Notificaciones
+# MarketAWS: E-commerce Serverless y Alta Disponibilidad
 
-Servicios: EC2 + ALB + Lambda + RDS + SQS + SNS + S3
+Este proyecto es un sistema de Marketplace robusto desplegado en AWS, utilizando una arquitectura moderna que combina servicios Serverless con infraestructura escalable.
 
-Descripción: Vendedores publican productos (imágenes en S3, datos en RDS). Las órdenes entran por API Gateway → Lambda → SQS. Otra Lambda consume la cola, procesa el pago (simulado) y publica en SNS para notificar por email/SMS.
+## 🏗️ Arquitectura del Sistema
 
-Implementar el patrón Fan-out: SNS tiene tres suscriptores distintos cuando llega una orden: (1) SQS cola de procesamiento de pago, (2) SQS cola de notificación al vendedor, (3) Lambda directa para actualizar inventario en RDS. Cada suscriptor debe tener un filter policy en SNS para recibir solo los mensajes que le corresponden según el tipo de evento.
+El sistema se divide en tres capas principales:
 
- 
+### 1. Capa de Usuario y Frontend
+*   **Hosting:** Desplegado en **Amazon S3** como sitio web estático.
+*   **Interfaz:** Diseño futurista "Nexus" con modo oscuro y acentos neon.
+*   **Funcionalidad:** Permite navegar por productos y realizar compras simuladas conectándose directamente al backend.
+*   **URL:** [http://marketplace-assets-prod-bucket.s3-website-us-east-1.amazonaws.com/](http://marketplace-assets-prod-bucket.s3-website-us-east-1.amazonaws.com/)
 
-La cola principal de SQS debe tener configurada una Dead Letter Queue (DLQ) con maxReceiveCount: 3. Una Lambda separada debe monitorear la DLQ cada 5 minutos via EventBridge, leer los mensajes fallidos, registrar el error en RDS y notificar al administrador por SNS.
+### 2. Procesamiento de Órdenes (Serverless)
+*   **API Gateway:** Punto de entrada para las peticiones de compra.
+*   **Lambda (Ingestion):** Recibe la orden, genera un ID único y la pone en una cola **SQS**.
+*   **SQS (Main Queue):** Actúa como buffer para desacoplar la ingesta del procesamiento.
+*   **Lambda (Processor):** Consume mensajes de SQS, simula el pago y publica en **SNS**.
+*   **SNS (Fan-out):** Distribuye notificaciones a múltiples suscriptores (Email, Logs, etc.).
+*   **Dead Letter Queue (DLQ):** Captura mensajes que fallan 3 veces para su posterior auditoría.
 
- 
+### 3. Infraestructura de Servidores (High Availability)
+*   **Balanceador de Carga (ALB):** Distribuye el tráfico web.
+*   **Despliegue Canary (70/30):** El ALB envía el 70% del tráfico a la versión estable (Main) y el 30% a la versión de prueba (Canary).
+*   **EC2 Instances:** Servidores Nginx que alojan la lógica de servidor y el contenido.
 
-EC2 con NGINX debe estar configurado como reverse proxy con upstream ponderado: 70% del tráfico al servidor de la app principal, 30% a una instancia "canary" con la versión nueva. Demostrar el cambio de pesos sin downtime.
+---
 
- 
+## 🛠️ Credenciales y Endpoints Clave
 
-Las imágenes de productos en S3 deben pasar por una Lambda de validación (tamaño máximo, formato permitido, sin contenido explícito usando Rekognition) antes de quedar disponibles. Si la validación falla, mover el objeto a un prefijo /rejected/ y notificar al vendedor.
+*   **API URL:** `https://2uqkjsioug.execute-api.us-east-1.amazonaws.com/create-order`
+*   **ALB DNS:** `mybalanceadordecarga021-1004123642.us-east-1.elb.amazonaws.com`
+*   **RDS (MySQL):** `marketplace-prod-database-1.c8vy0soyszl7.us-east-1.rds.amazonaws.com`
 
-## ALB Canary (implementado en AWS)
+---
 
-- **ALB:** `mybalanceadordecarga021` — DNS: `mybalanceadordecarga021-1004123642.us-east-1.elb.amazonaws.com`
-- **Listener 80:** forward ponderado **70 %** `groupApp` (principal) / **30 %** `TG-Marketplace-Canary`
-- **Instancias:** `Marketplace-Main` (`i-05fbee32a3ff873b5`) solo en `groupApp`; `Marketplace-Canary` (`i-0a6080416e7e70527`) solo en `TG-Marketplace-Canary`. Nginx en ambas responde **200** en `/` (cuerpo HTML distingue MAIN vs CANARY).
-- **Nota:** la instancia antigua `EC2-NGINX-Proxy` (`i-0d7dfd5c6fef5eeda`) quedó fuera del balanceador (health check devolvía 500). Puedes detenerla o reconfigurarla si aún la necesitas fuera del ALB.
-- **Coste:** dos `t3.micro` adicionales en ejecución; apágalas o elimínalas cuando no las uses.
+## 🚀 Pruebas de Funcionamiento
 
-**Probar distribución (200 peticiones, Bash):**
-
+### Crear una Orden (CURL / Postman)
 ```bash
-ALB_DNS="mybalanceadordecarga021-1004123642.us-east-1.elb.amazonaws.com"
-main=0; canary=0
-for i in $(seq 1 200); do
-  body=$(curl -s --max-time 8 "http://${ALB_DNS}/")
-  if echo "$body" | grep -q "Marketplace MAIN"; then ((main++)); elif echo "$body" | grep -q "Marketplace CANARY"; then ((canary++)); fi
-done
-echo "MAIN=$main CANARY=$canary"
+curl -X POST https://2uqkjsioug.execute-api.us-east-1.amazonaws.com/create-order \
+     -H "Content-Type: application/json" \
+     -d '{"buyerId": "user_test", "productId": "101", "amount": 2500}'
 ```
+
+### Verificar Balanceo Canary (PowerShell)
+```powershell
+for ($i=1; $i -le 20; $i++) { 
+    $res = Invoke-RestMethod -Uri "http://mybalanceadordecarga021-1004123642.us-east-1.elb.amazonaws.com/"
+    Write-Host "Petición $i: $res"
+}
+```
+
+---
+
+## 🛡️ Monitoreo y Fallos
+Si un mensaje falla en la cola principal, se mueve a la **DLQ**. La Lambda `dlq-monitor-handler` se encarga de registrar estos fallos en la tabla `error_logs` de la base de datos MySQL para que el administrador pueda revisarlos.
