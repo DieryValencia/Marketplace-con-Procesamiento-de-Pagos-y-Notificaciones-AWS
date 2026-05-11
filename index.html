@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketAWS | Nexus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f2ff; /* Cyan Neon */
+            --secondary: #7000ff; /* Purple Neon */
+            --accent: #ff007a; /* Pink Neon */
+            --bg: #050505;
+            --card-bg: rgba(20, 20, 20, 0.7);
+            --text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Futuristic Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+            opacity: 0.3;
+        }
+
+        .glow-orb {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: var(--secondary);
+            filter: blur(150px);
+            opacity: 0.15;
+            z-index: -1;
+            animation: float 20s infinite alternate;
+        }
+
+        @keyframes float {
+            0% { transform: translate(-20%, -20%); }
+            100% { transform: translate(50%, 50%); }
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(15px);
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+        }
+
+        .logo .box {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 6px;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .logo span { color: var(--primary); }
+
+        .hero {
+            padding: 8rem 5% 6rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to bottom, #fff 40%, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .hero p {
+            color: #aaa;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 100px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 20px;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: translateX(-100%);
+            transition: 0.6s;
+        }
+
+        .product-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .product-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .product-image {
+            height: 180px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border: 1px solid var(--border);
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+
+        .product-tag {
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .product-price {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 15px 0;
+            color: var(--primary);
+        }
+
+        .btn {
+            background: transparent;
+            color: white;
+            border: 1px solid var(--primary);
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: var(--primary);
+            transition: all 0.3s;
+            z-index: -1;
+        }
+
+        .btn:hover {
+            color: black;
+        }
+
+        .btn:hover::after {
+            height: 100%;
+        }
+
+        /* Modal Futurista */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: #0a0a0a;
+            padding: 40px;
+            border-radius: 32px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--secondary);
+            box-shadow: 0 0 50px rgba(112, 0, 255, 0.2);
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            background: #111;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--secondary);
+        }
+
+        .success-toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(200%);
+            background: var(--primary);
+            color: black;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-weight: 800;
+            box-shadow: 0 0 30px var(--primary);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 3000;
+            text-transform: uppercase;
+        }
+
+        .success-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .status-badge {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb"></div>
+
+<header>
+    <div class="logo">
+        <div class="box"></div>
+        Market<span>AWS</span>
+    </div>
+    <div class="status-badge" id="backend-status">SYSTEM_ACTIVE</div>
+</header>
+
+<section class="hero">
+    <h1>Nexus Store</h1>
+    <p>Adquiere la tecnología del mañana en el marketplace más avanzado del ecosistema AWS.</p>
+</section>
+
+<div class="container">
+    <div class="product-grid" id="product-grid"></div>
+</div>
+
+<div class="modal" id="checkout-modal">
+    <div class="modal-content">
+        <h2 style="margin-bottom: 25px; font-weight: 800; text-transform: uppercase; letter-spacing: -1px;">Protocolo de Orden</h2>
+        <div id="order-summary" style="background: #151515; padding: 20px; border-radius: 16px; margin-bottom: 25px; border: 1px solid var(--border);">
+            <p id="summary-name" style="font-weight: 600; color: #fff; margin-bottom: 5px;"></p>
+            <p id="summary-price" style="color: var(--primary); font-weight: 800; font-size: 1.2rem;"></p>
+        </div>
+        <form id="order-form">
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Identidad Digital (Email)</label>
+                <input type="email" id="email" placeholder="nexus_user@aws.com" required>
+            </div>
+            <button type="submit" class="btn" id="submit-btn">Ejecutar Transacción</button>
+            <button type="button" class="btn" style="border-color: #333; margin-top: 15px;" onclick="closeModal()">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<div class="success-toast" id="success-toast">
+    Transacción Completada_
+</div>
+
+<script>
+    const API_URL = "https://2uqkjsioug.execute-api.us-east-1.amazonaws.com/create-order";
+    
+    const products = [
+        { id: "101", name: "Quantum Laptop", price: 2499, icon: "💻", tag: "Next Gen" },
+        { id: "102", name: "Neural Linker", price: 1299, icon: "🧠", tag: "Cyberware" },
+        { id: "103", name: "NanoPods v3", price: 499, icon: "🔈", tag: "Audio" },
+        { id: "104", name: "Holo Watch", price: 899, icon: "⌚", tag: "Wearable" },
+        { id: "105", name: "Plasma Tablet", price: 1599, icon: "📟", tag: "Display" },
+        { id: "106", name: "Core Processor", price: 3500, icon: "💠", tag: "Hardware" }
+    ];
+
+    let currentProduct = null;
+
+    function init() {
+        const grid = document.getElementById('product-grid');
+        products.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-image">${p.icon}</div>
+                <span class="product-tag">${p.tag}</span>
+                <h3 style="font-size: 1.4rem; margin-top: 5px;">${p.name}</h3>
+                <p class="product-price">$${p.price}</p>
+                <button class="btn" onclick="openModal('${p.id}')">Adquirir</button>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function openModal(id) {
+        currentProduct = products.find(p => p.id === id);
+        document.getElementById('summary-name').innerText = currentProduct.name;
+        document.getElementById('summary-price').innerText = `$${currentProduct.price}`;
+        document.getElementById('checkout-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('checkout-modal').style.display = 'none';
+    }
+
+    document.getElementById('order-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submit-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "Sincronizando...";
+        btn.disabled = true;
+
+        const payload = {
+            buyerId: "nexus_agent_" + Math.floor(Math.random()*1000),
+            productId: currentProduct.id,
+            quantity: 1,
+            amount: currentProduct.price,
+            customer_email: document.getElementById('email').value
+        };
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                showSuccess();
+                closeModal();
+            } else {
+                alert("Error en el protocolo de red.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Falla crítica de conexión.");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    function showSuccess() {
+        const toast = document.getElementById('success-toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    init();
+</script>
+
+</body>
+</html>
