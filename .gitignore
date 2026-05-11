@@ -1,0 +1,52 @@
+# --- Carpeta local (documentación, plantillas, SQL, notas; no versionar) ---
+gitignore/
+
+# --- Variables de entorno y secretos ---
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.key
+secrets.json
+credentials.json
+.aws/
+
+# --- Dependencias y entornos ---
+node_modules/
+vendor/
+__pycache__/
+*.py[cod]
+.Python
+.venv/
+venv/
+env/
+
+# --- Builds y salidas ---
+dist/
+build/
+out/
+.next/
+.nuxt/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+
+# --- Logs y temporales ---
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.swp
+*~
+._*
+
+# --- SO e IDE (ajusta si versionas .vscode compartido) ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+
+# --- Herramientas / agentes locales ---
+.cursor/
