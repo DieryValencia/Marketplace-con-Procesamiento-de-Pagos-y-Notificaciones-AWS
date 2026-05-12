@@ -1,0 +1,101 @@
+/* Custom Tech Aesthetic */
+:root {
+    --bg-main: #020617;
+    --border-slate: #1e293b;
+    --neon-indigo: #6366f1;
+}
+
+/* Background Atmosphere */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Technical Grid Overlay */
+main::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Glassmorphism Product Card */
+.product-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-slate);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover {
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.2);
+}
+
+/* LED Indicators */
+.led-status {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.led-green { background-color: #10b981; box-shadow: 0 0 8px #10b981; }
+.led-amber { background-color: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+.led-red { background-color: #f43f5e; box-shadow: 0 0 8px #f43f5e; }
+
+/* Network Pulse Animation */
+@keyframes network-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.pulse-ring::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--neon-indigo);
+    border-radius: 50%;
+    animation: network-pulse 1.5s infinite;
+}
+
+/* Compact Skeleton */
+@keyframes skeleton-shimmer {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.1; }
+    100% { opacity: 0.3; }
+}
+
+.skeleton-box {
+    background-color: rgba(255,255,255,0.05);
+    animation: skeleton-shimmer 2s infinite ease-in-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+}

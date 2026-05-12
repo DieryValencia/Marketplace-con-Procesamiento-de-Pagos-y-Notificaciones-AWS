@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Elite | Tienda Principal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'nexus-dark': '#020617',
+                        'nexus-card': '#0f172a',
+                        'nexus-accent': '#6366f1',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-nexus-dark text-white font-['Inter'] selection:bg-nexus-accent/30 overflow-x-hidden">
+
+    <!-- Header Compacto -->
+    <nav class="fixed top-0 w-full z-50 bg-nexus-dark/80 backdrop-blur-md border-b border-slate-800 h-14 flex items-center px-6">
+        <div class="max-w-[1600px] w-full mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-7 h-7 bg-indigo-600 rounded flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <svg class="w-4 h-4 text-white fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <span class="font-black text-sm tracking-tighter uppercase">Nexus<span class="text-slate-500">Elite</span></span>
+            </div>
+
+            <!-- Search Bar Central -->
+            <div class="hidden lg:flex flex-1 max-w-xl mx-8">
+                <input type="text" placeholder="Buscar en el ecosistema AWS..." class="w-full bg-slate-900 border border-slate-800 rounded-md py-1 px-4 text-xs focus:outline-none focus:border-indigo-500 transition-all">
+            </div>
+
+            <div class="flex items-center gap-6">
+                <button onclick="toggleAdminModal()" class="text-[10px] font-bold text-rose-500 hover:text-rose-400 tracking-widest uppercase flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
+                    Admin DLQ
+                </button>
+                <a href="index.html" class="text-[10px] font-bold text-slate-400 hover:text-white tracking-widest uppercase">Vendedor</a>
+                <div class="h-4 w-px bg-slate-800"></div>
+                <button class="bg-white text-black px-4 py-1.5 rounded text-[10px] font-black tracking-widest uppercase hover:bg-indigo-400 transition-all">Acceder</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24 px-6 max-w-[1600px] mx-auto">
+        <!-- Grilla Comercial Densa (5 Columnas) -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <!-- Los productos se inyectan dinámicamente -->
+        </div>
+
+        <!-- Status Tracer Overlay (Asíncrono) -->
+        <div id="status-tracer" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/80 backdrop-blur-lg">
+            <div class="text-center">
+                <div class="relative w-20 h-20 mx-auto mb-6">
+                    <div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
+                    <div id="tracer-progress" class="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <h2 id="tracer-title" class="text-lg font-black uppercase tracking-tighter">Procesando Transacción</h2>
+                <p id="tracer-desc" class="text-[10px] font-mono text-slate-500 mt-2 uppercase tracking-widest">Enviando mensaje a SQS...</p>
+            </div>
+        </div>
+
+        <!-- Modal Admin DLQ -->
+        <div id="admin-modal" class="fixed inset-0 z-[60] hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+            <div class="bg-nexus-card border border-rose-500/30 w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl">
+                <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-rose-500/5">
+                    <h2 class="font-black text-rose-500 text-sm tracking-widest uppercase flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        Monitor Dead Letter Queue (DLQ)
+                    </h2>
+                    <button onclick="toggleAdminModal()" class="text-slate-500 hover:text-white">✕</button>
+                </div>
+                <div class="max-h-[500px] overflow-y-auto p-0">
+                    <table class="w-full text-left text-[10px] font-mono">
+                        <thead class="bg-black/40 text-slate-600 sticky top-0">
+                            <tr>
+                                <th class="px-6 py-3">Timestamp</th>
+                                <th class="px-6 py-3">Evento</th>
+                                <th class="px-6 py-3">Error</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dlq-logs" class="divide-y divide-slate-800">
+                            <!-- Logs de RDS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Canary State -->
+    <footer class="mt-20 border-t border-slate-900 py-8 px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-6 text-[9px] font-mono text-slate-600 tracking-widest uppercase">
+            <span>©2026 Nexus_Elite_Systems</span>
+            <span class="flex items-center gap-2">
+                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                AWS_REGION: US-EAST-1
+            </span>
+        </div>
+        
+        <div id="canary-badge" class="px-3 py-1 rounded border text-[9px] font-bold uppercase tracking-[0.2em] transition-all">
+            ROUTING: DETECTING...
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
